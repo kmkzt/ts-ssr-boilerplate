@@ -7,7 +7,6 @@ import compression from 'compression'
 import { StaticRouter } from 'react-router-dom'
 import App from './app'
 
-type Webpack = typeof import('webpack')
 export function startServer() {
   const app = express()
   const port = process.env.PORT || 3000
@@ -25,14 +24,11 @@ export function startServer() {
     const webpackDevMiddleware: typeof import('webpack-dev-middleware') = require('webpack-dev-middleware')
     const config: import('webpack').Configuration = require('../webpack.config')
     const compiler = webpack(config)
-    // TODO: replce manifest.json when development
-    // console.log(
-    //   compiler.inputFileSystem.readFileSync(resolve('dist', 'manifest.json'))
-    // )
     app.use(webpackHotMiddleware(compiler))
     app.use(
       webpackDevMiddleware(compiler, {
-        publicPath: (config.output && config.output.publicPath) || ''
+        publicPath: (config.output && config.output.publicPath) || '',
+        writeToDisk: true
       })
     )
   }
@@ -50,10 +46,9 @@ export function startServer() {
     // TODO: replce manifest.json when development
     const manifest =
       process.env.NODE_ENV === 'production'
-        ? require('dist/manifest.json')
-        : {
-            'client.js': '/public/client.bundle.js'
-          }
+        ? require('./dist/manifest.json')
+        : require('../dist/manifest.json')
+
     res.send(`<!DOCTYPE html>
       <html lang="en">
         <head>
